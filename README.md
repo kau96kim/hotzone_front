@@ -1,3 +1,21 @@
+# hotZone
+ 
+Sprint 1
+
+- limitations
+
+1. API searches location data from GeoData API although the data is already exists in local DB.
+
+
+APPLICATION URL
+
+- Front
+https://react-hotzone.herokuapp.com/
+
+- Back
+https://django-hotzone.herokuapp.com/
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
