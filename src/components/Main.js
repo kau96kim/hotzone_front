@@ -50,6 +50,7 @@ const Main = () => {
             setAllCases(res.data);
         })
         .catch((error) => {
+          //TODO. (Michael, please handle error 500)
         });
     }
 
@@ -66,15 +67,20 @@ const Main = () => {
     <MainWrapper>
       <Title>Case data</Title>
       <Table>
-        <Th>Case Number</Th>
-        <Th>Date Confirmed</Th>
-        <Th>Local or Imported</Th>
-        <Th>Patient Name</Th>
-        <Th>Identity Document Number</Th>
-        <Th>Date of Birth</Th>
-        <Th>Virus Name</Th>
-        <Th>Disease</Th>
-        <Th>Max. Infectious Period (days)</Th>
+        <thead>
+          <tr>
+            <Th>Case Number</Th>
+            <Th>Date Confirmed</Th>
+            <Th>Local or Imported</Th>
+            <Th>Patient Name</Th>
+            <Th>Identity Document Number</Th>
+            <Th>Date of Birth</Th>
+            <Th>Virus Name</Th>
+            <Th>Disease</Th>
+            <Th>Max. Infectious Period (days)</Th>
+          </tr>
+        </thead>
+        <tbody>
         {allCases.map((item, index) => (
         <Tr onClick={() => goToCase(item.case_number)} key={index}>
           <Td>{item.case_number}</Td>
@@ -87,6 +93,7 @@ const Main = () => {
           <Td>{item.disease}</Td>
           <Td>{item.max_infectious_period}</Td>
         </Tr>))}
+        </tbody>
       </Table>
     </MainWrapper>
   );

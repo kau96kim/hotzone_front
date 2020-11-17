@@ -8,7 +8,7 @@ const CaseWrapper = styled.div`
   text-align: center;
 `;
 const Table = styled.table`
-  font-size: 15px;
+  font-size: 14px;
   border-collapse: collapse;
   margin-left: auto;
   margin-right: auto;
@@ -29,6 +29,7 @@ const Th = styled.th`
 const Td = styled.td`
   border: 2px solid black;
   padding: 10px;
+  max-width: 420px;
 `;
 const Title = styled.div`
   font-size: 30px;
@@ -62,6 +63,7 @@ const Button = styled.button`
   background-color: thistle;
   border: 2px solid black;
   color: purple;
+  margin-bottom: 20px;
 `;
 
 const Case = () => {
@@ -71,9 +73,12 @@ const Case = () => {
   const [locations, setLocations] = useState([]);
   const [locationInput, setLocationInput] = useState("");
   const [locationOutput, setLocationOutput] = useState(null);
+  const [dbOutput, setDbOutput] = useState(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [category, setCategory] = useState("");
+  const [selectedLocationIndex, setSelectedLocationIndex] = useState(-1);
+  const [selectedType, setSelectedType] = useState("");
 
   useEffect(() => {
     const getCaseDetail = () => {
@@ -83,6 +88,7 @@ const Case = () => {
             setCaseDetail(res.data);
         })
         .catch((error) => {
+          //TODO. (Michael, please handle error 500)
         });
     }
     const getLocations = () => {
@@ -92,6 +98,7 @@ const Case = () => {
             setLocations(res.data);
         })
         .catch((error) => {
+          //TODO. (Michael, please handle error 500)
         });
     }
     getCaseDetail();
@@ -108,12 +115,11 @@ const Case = () => {
         params: { q: locationInput },
       })
       .then((res) => {
-        setLocationOutput(res.data[0]);
+        setDbOutput(res.data.location_db);
+        setLocationOutput(res.data.location_geo);
       })
       .catch((error) => {
-        if (error.response.status === 400) {
-          alert("No search result");
-        }
+        //TODO. (Michael, please handle error 404 and 500)
       });
   };
 
@@ -129,19 +135,46 @@ const Case = () => {
     setCategory(e.target.value);
   };
 
+  const selectSearchResult = (index, type) => {
+    setSelectedLocationIndex(index);
+    setSelectedType(type);
+  };
+
   const handleAddLocation = (index) => {
-    var dataToBeAdded = {
-    location: locationOutput.nameEN,
-    address: locationOutput.addressEN,
-    x_coord: locationOutput.x,
-    y_coord: locationOutput.y,
-    date_from: dateFrom,
-    date_to: dateTo,
-    category: category
-  }
 
-    console.log(dataToBeAdded);
+    if (selectedLocationIndex===-1) {
+      alert("Please select a location");
+      return;
+    }  
 
+    if (dateFrom==="" || dateTo==="" || category==="") {
+      alert("Please enter all the information!");
+      return;
+    }
+
+    var dataToBeAdded;
+    if (selectedType==="db"){
+      dataToBeAdded = {
+        location: dbOutput[selectedLocationIndex].location,
+        address: dbOutput[selectedLocationIndex].address,
+        x_coord: dbOutput[selectedLocationIndex].x_coord,
+        y_coord: dbOutput[selectedLocationIndex].y_coord,
+        date_from: dateFrom,
+        date_to: dateTo,
+        category: category
+      }
+    } else {
+      dataToBeAdded = {
+        location: locationOutput[selectedLocationIndex].location,
+        address: locationOutput[selectedLocationIndex].address,
+        x_coord: locationOutput[selectedLocationIndex].x_coord,
+        y_coord: locationOutput[selectedLocationIndex].y_coord,
+        date_from: dateFrom,
+        date_to: dateTo,
+        category: category
+      }
+    }
+    
     axios
     .post(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}/locations`, dataToBeAdded)
     .then((res) => {
@@ -149,6 +182,7 @@ const Case = () => {
         window.location.reload(false);
     })
     .catch((error) => {
+      //TODO. (Michael, please handle error 400 and 500)
     });
   };
 
@@ -161,34 +195,45 @@ const Case = () => {
       </ButtonWrapper>
       <Title>Case Number: {caseDetail.case_number}</Title>
       <Table>
-        <Th>Date Confirmed</Th>
-        <Th>Local or Imported</Th>
-        <Th>Patient Name</Th>
-        <Th>ID Number</Th>
-        <Th>Date of Birth</Th>
-        <Th>Virus Name</Th>
-        <Th>Disease</Th>
-        <Th>Max Infectious Period</Th>
-        <tr>
-          <Td>{caseDetail.date_confirmed}</Td>
-          <Td>{caseDetail.local_or_imported}</Td>
-          <Td>{caseDetail.patient_name}</Td>
-          <Td>{caseDetail.patient_id_number}</Td>
-          <Td>{caseDetail.patient_birth}</Td>
-          <Td>{caseDetail.virus_name}</Td>
-          <Td>{caseDetail.disease}</Td>
-          <Td>{caseDetail.max_infectious_period}</Td>
-        </tr>
+        <thead>
+          <tr>
+            <Th>Date Confirmed</Th>
+            <Th>Local or Imported</Th>
+            <Th>Patient Name</Th>
+            <Th>ID Number</Th>
+            <Th>Date of Birth</Th>
+            <Th>Virus Name</Th>
+            <Th>Disease</Th>
+            <Th>Max Infectious Period</Th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <Td>{caseDetail.date_confirmed}</Td>
+            <Td>{caseDetail.local_or_imported}</Td>
+            <Td>{caseDetail.patient_name}</Td>
+            <Td>{caseDetail.patient_id_number}</Td>
+            <Td>{caseDetail.patient_birth}</Td>
+            <Td>{caseDetail.virus_name}</Td>
+            <Td>{caseDetail.disease}</Td>
+            <Td>{caseDetail.max_infectious_period}</Td>
+          </tr>
+        </tbody>
       </Table>
 
       <Table>
-        <Th>Location</Th>
-        <Th>Address</Th>
-        <Th>X Coord</Th>
-        <Th>Y Coord</Th>
-        <Th>Date From</Th>
-        <Th>Date To</Th>
-        <Th>Category</Th>
+        <thead>
+          <tr>
+            <Th>Location</Th>
+            <Th>Address</Th>
+            <Th>X Coord</Th>
+            <Th>Y Coord</Th>
+            <Th>Date From</Th>
+            <Th>Date To</Th>
+            <Th>Category</Th>
+          </tr>
+        </thead>
+        <tbody>
         {locations.map((location, index) => (
         <tr key={index}>
           <Td>{location.location}</Td>
@@ -199,6 +244,7 @@ const Case = () => {
           <Td>{location.date_to}</Td>
           <Td>{location.category}</Td>
         </tr>))}
+        </tbody>
       </Table>
 
       <LocationSearchWrapper>
@@ -212,44 +258,90 @@ const Case = () => {
       {locationOutput ? (
         <div>
           <SearchListTable>
-            <Th>Location</Th>
-            <Th>Address</Th>
-            <Th>X Coord</Th>
-            <Th>Y Coord</Th>
-            <tr>
-              <Td>{locationOutput.nameEN}</Td>
-              <Td>{locationOutput.addressEN}</Td>
-              <Td>{locationOutput.x}</Td>
-              <Td>{locationOutput.y}</Td>
-            </tr>
+            <thead>
+              <tr>
+                <Th>Location (Frequently used)</Th>
+                <Th>Address</Th>
+                <Th>X Coord</Th>
+                <Th>Y Coord</Th>
+                <Th></Th>
+              </tr>
+            </thead>
+            <tbody>
+                {dbOutput.map((output, index) => (
+                <tr key={index}>
+                  <Td>{output.location}</Td>
+                  <Td>{output.address}</Td>
+                  <Td>{output.x_coord}</Td>
+                  <Td>{output.y_coord}</Td>
+                  {selectedLocationIndex===index && selectedType==="db" ? (
+                    <Td>✓selected</Td>
+                  ): (
+                    <Td><button onClick={()=>selectSearchResult(index, "db")}>select</button></Td>
+                  )}
+                </tr>))}
+            </tbody>
+            <thead>
+              <tr>
+                <Th>Location (New)</Th>
+                <Th>Address</Th>
+                <Th>X Coord</Th>
+                <Th>Y Coord</Th>
+                <Th></Th>
+              </tr>
+            </thead>
+            <tbody>
+                {locationOutput.map((output, index) => (
+                <tr key={index}>
+                  <Td>{output.location}</Td>
+                  <Td>{output.address}</Td>
+                  <Td>{output.x_coord}</Td>
+                  <Td>{output.y_coord}</Td>
+                  {selectedLocationIndex===index && selectedType==="geo" ? (
+                    <Td>✓selected</Td>
+                  ): (
+                    <Td><button onClick={()=>selectSearchResult(index, "geo")}>select</button></Td>
+                  )}
+                </tr>))}
+            </tbody>
           </SearchListTable>
           <Table>
-            <Th>Date From</Th>
-            <Th>Date To</Th>
-            <Th>Category</Th>
-            <tr>
-              <Td>
-                <Input
-                  onChange={handleDateFromChange}
-                  value={dateFrom}
-                  placeholder="****-**-**"
-                />
-              </Td>
-              <Td>
-                <Input
-                  onChange={handleDateToChange}
-                  value={dateTo}
-                  placeholder="****-**-**"
-                />
-              </Td>
-              <Td>
-                <Input
-                  onChange={handleCategoryChange}
-                  value={category}
-                  placeholder="Visit, Workplace, Residence"
-                />
-              </Td>
-            </tr>
+            <thead>
+              <tr>
+                <Th>Date From</Th>
+                <Th>Date To</Th>
+                <Th>Category</Th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <Td>
+                  <Input
+                    onChange={handleDateFromChange}
+                    value={dateFrom}
+                    placeholder="****-**-**"
+                  />
+                </Td>
+                <Td>
+                  <Input
+                    onChange={handleDateToChange}
+                    value={dateTo}
+                    placeholder="****-**-**"
+                  />
+                </Td>
+                <Td>
+                  <select 
+                    onChange={handleCategoryChange}
+                    value={category}
+                  >    
+                    <option value=""></option>        
+                    <option value="Visit">Visit</option>
+                    <option value="Workplace">Workplace</option>
+                    <option value="Residence">Residence</option>
+                  </select>
+                </Td>
+              </tr>
+            </tbody>
           </Table>
 
           <Button onClick={handleAddLocation}>Add Location</Button>
