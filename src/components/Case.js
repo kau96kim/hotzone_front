@@ -195,34 +195,45 @@ const Case = () => {
       </ButtonWrapper>
       <Title>Case Number: {caseDetail.case_number}</Title>
       <Table>
-        <Th>Date Confirmed</Th>
-        <Th>Local or Imported</Th>
-        <Th>Patient Name</Th>
-        <Th>ID Number</Th>
-        <Th>Date of Birth</Th>
-        <Th>Virus Name</Th>
-        <Th>Disease</Th>
-        <Th>Max Infectious Period</Th>
-        <tr>
-          <Td>{caseDetail.date_confirmed}</Td>
-          <Td>{caseDetail.local_or_imported}</Td>
-          <Td>{caseDetail.patient_name}</Td>
-          <Td>{caseDetail.patient_id_number}</Td>
-          <Td>{caseDetail.patient_birth}</Td>
-          <Td>{caseDetail.virus_name}</Td>
-          <Td>{caseDetail.disease}</Td>
-          <Td>{caseDetail.max_infectious_period}</Td>
-        </tr>
+        <thead>
+          <tr>
+            <Th>Date Confirmed</Th>
+            <Th>Local or Imported</Th>
+            <Th>Patient Name</Th>
+            <Th>ID Number</Th>
+            <Th>Date of Birth</Th>
+            <Th>Virus Name</Th>
+            <Th>Disease</Th>
+            <Th>Max Infectious Period</Th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <Td>{caseDetail.date_confirmed}</Td>
+            <Td>{caseDetail.local_or_imported}</Td>
+            <Td>{caseDetail.patient_name}</Td>
+            <Td>{caseDetail.patient_id_number}</Td>
+            <Td>{caseDetail.patient_birth}</Td>
+            <Td>{caseDetail.virus_name}</Td>
+            <Td>{caseDetail.disease}</Td>
+            <Td>{caseDetail.max_infectious_period}</Td>
+          </tr>
+        </tbody>
       </Table>
 
       <Table>
-        <Th>Location</Th>
-        <Th>Address</Th>
-        <Th>X Coord</Th>
-        <Th>Y Coord</Th>
-        <Th>Date From</Th>
-        <Th>Date To</Th>
-        <Th>Category</Th>
+        <thead>
+          <tr>
+            <Th>Location</Th>
+            <Th>Address</Th>
+            <Th>X Coord</Th>
+            <Th>Y Coord</Th>
+            <Th>Date From</Th>
+            <Th>Date To</Th>
+            <Th>Category</Th>
+          </tr>
+        </thead>
+        <tbody>
         {locations.map((location, index) => (
         <tr key={index}>
           <Td>{location.location}</Td>
@@ -233,6 +244,7 @@ const Case = () => {
           <Td>{location.date_to}</Td>
           <Td>{location.category}</Td>
         </tr>))}
+        </tbody>
       </Table>
 
       <LocationSearchWrapper>
@@ -246,11 +258,16 @@ const Case = () => {
       {locationOutput ? (
         <div>
           <SearchListTable>
+            <thead>
+              <tr>
                 <Th>Location (Frequently used)</Th>
                 <Th>Address</Th>
                 <Th>X Coord</Th>
                 <Th>Y Coord</Th>
                 <Th></Th>
+              </tr>
+            </thead>
+            <tbody>
                 {dbOutput.map((output, index) => (
                 <tr key={index}>
                   <Td>{output.location}</Td>
@@ -263,11 +280,17 @@ const Case = () => {
                     <Td><button onClick={()=>selectSearchResult(index, "db")}>select</button></Td>
                   )}
                 </tr>))}
+            </tbody>
+            <thead>
+              <tr>
                 <Th>Location (New)</Th>
                 <Th>Address</Th>
                 <Th>X Coord</Th>
                 <Th>Y Coord</Th>
                 <Th></Th>
+              </tr>
+            </thead>
+            <tbody>
                 {locationOutput.map((output, index) => (
                 <tr key={index}>
                   <Td>{output.location}</Td>
@@ -280,38 +303,45 @@ const Case = () => {
                     <Td><button onClick={()=>selectSearchResult(index, "geo")}>select</button></Td>
                   )}
                 </tr>))}
+            </tbody>
           </SearchListTable>
           <Table>
-            <Th>Date From</Th>
-            <Th>Date To</Th>
-            <Th>Category</Th>
-            <tr>
-              <Td>
-                <Input
-                  onChange={handleDateFromChange}
-                  value={dateFrom}
-                  placeholder="****-**-**"
-                />
-              </Td>
-              <Td>
-                <Input
-                  onChange={handleDateToChange}
-                  value={dateTo}
-                  placeholder="****-**-**"
-                />
-              </Td>
-              <Td>
-                <select 
-                  onChange={handleCategoryChange}
-                  value={category}
-                >    
-                  <option value=""></option>        
-                  <option value="Visit">Visit</option>
-                  <option value="Workplace">Workplace</option>
-                  <option value="Residence">Residence</option>
-                </select>
-              </Td>
-            </tr>
+            <thead>
+              <tr>
+                <Th>Date From</Th>
+                <Th>Date To</Th>
+                <Th>Category</Th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <Td>
+                  <Input
+                    onChange={handleDateFromChange}
+                    value={dateFrom}
+                    placeholder="****-**-**"
+                  />
+                </Td>
+                <Td>
+                  <Input
+                    onChange={handleDateToChange}
+                    value={dateTo}
+                    placeholder="****-**-**"
+                  />
+                </Td>
+                <Td>
+                  <select 
+                    onChange={handleCategoryChange}
+                    value={category}
+                  >    
+                    <option value=""></option>        
+                    <option value="Visit">Visit</option>
+                    <option value="Workplace">Workplace</option>
+                    <option value="Residence">Residence</option>
+                  </select>
+                </Td>
+              </tr>
+            </tbody>
           </Table>
 
           <Button onClick={handleAddLocation}>Add Location</Button>
