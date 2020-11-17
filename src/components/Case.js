@@ -8,7 +8,7 @@ const CaseWrapper = styled.div`
   text-align: center;
 `;
 const Table = styled.table`
-  font-size: 13px;
+  font-size: 14px;
   border-collapse: collapse;
   margin-left: auto;
   margin-right: auto;
@@ -29,6 +29,7 @@ const Th = styled.th`
 const Td = styled.td`
   border: 2px solid black;
   padding: 10px;
+  max-width: 420px;
 `;
 const Title = styled.div`
   font-size: 30px;
