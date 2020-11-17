@@ -73,10 +73,12 @@ const Case = () => {
   const [locations, setLocations] = useState([]);
   const [locationInput, setLocationInput] = useState("");
   const [locationOutput, setLocationOutput] = useState(null);
+  const [dbOutput, setDbOutput] = useState(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [category, setCategory] = useState("");
   const [selectedLocationIndex, setSelectedLocationIndex] = useState(-1);
+  const [selectedType, setSelectedType] = useState("");
 
   useEffect(() => {
     const getCaseDetail = () => {
@@ -111,12 +113,14 @@ const Case = () => {
         params: { q: locationInput },
       })
       .then((res) => {
-        setLocationOutput(res.data);
+        console.log(res.data);
+        setDbOutput(res.data.location_db);
+        setLocationOutput(res.data.location_geo);
       })
       .catch((error) => {
-        if (error.response.status === 400) {
-          alert("No search result");
-        }
+        //if (error.response.status === 400) {
+          //alert("No search result");
+        //}
       });
   };
 
@@ -132,8 +136,9 @@ const Case = () => {
     setCategory(e.target.value);
   };
 
-  const selectSearchResult = (index) => {
+  const selectSearchResult = (index, type) => {
     setSelectedLocationIndex(index);
+    setSelectedType(type);
   };
 
   const handleAddLocation = (index) => {
@@ -148,17 +153,28 @@ const Case = () => {
       return;
     }
 
-    var dataToBeAdded = {
-      location: locationOutput[selectedLocationIndex].nameEN,
-      address: locationOutput[selectedLocationIndex].addressEN,
-      x_coord: locationOutput[selectedLocationIndex].x,
-      y_coord: locationOutput[selectedLocationIndex].y,
-      date_from: dateFrom,
-      date_to: dateTo,
-      category: category
+    var dataToBeAdded;
+    if (selectedType==="db"){
+      dataToBeAdded = {
+        location: dbOutput[selectedLocationIndex].location,
+        address: dbOutput[selectedLocationIndex].address,
+        x_coord: dbOutput[selectedLocationIndex].x_coord,
+        y_coord: dbOutput[selectedLocationIndex].y_coord,
+        date_from: dateFrom,
+        date_to: dateTo,
+        category: category
+      }
+    } else {
+      dataToBeAdded = {
+        location: locationOutput[selectedLocationIndex].location,
+        address: locationOutput[selectedLocationIndex].address,
+        x_coord: locationOutput[selectedLocationIndex].x_coord,
+        y_coord: locationOutput[selectedLocationIndex].y_coord,
+        date_from: dateFrom,
+        date_to: dateTo,
+        category: category
+      }
     }
-
-    console.log(dataToBeAdded);
     
     axios
     .post(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}/locations`, dataToBeAdded)
@@ -230,21 +246,38 @@ const Case = () => {
       {locationOutput ? (
         <div>
           <SearchListTable>
-                <Th>Location</Th>
+                <Th>Location (Recently added)</Th>
+                <Th>Address</Th>
+                <Th>X Coord</Th>
+                <Th>Y Coord</Th>
+                <Th></Th>
+                {dbOutput.map((output, index) => (
+                <tr key={index}>
+                  <Td>{output.location}</Td>
+                  <Td>{output.address}</Td>
+                  <Td>{output.x_coord}</Td>
+                  <Td>{output.y_coord}</Td>
+                  {selectedLocationIndex===index ? (
+                    <Td>✓selected</Td>
+                  ): (
+                    <Td><button onClick={()=>selectSearchResult(index, "db")}>select</button></Td>
+                  )}
+                </tr>))}
+                <Th>Location (New)</Th>
                 <Th>Address</Th>
                 <Th>X Coord</Th>
                 <Th>Y Coord</Th>
                 <Th></Th>
                 {locationOutput.map((output, index) => (
                 <tr key={index}>
-                  <Td>{output.nameEN}</Td>
-                  <Td>{output.addressEN}</Td>
-                  <Td>{output.x}</Td>
-                  <Td>{output.y}</Td>
+                  <Td>{output.location}</Td>
+                  <Td>{output.address}</Td>
+                  <Td>{output.x_coord}</Td>
+                  <Td>{output.y_coord}</Td>
                   {selectedLocationIndex===index ? (
                     <Td>✓selected</Td>
                   ): (
-                    <Td><button onClick={()=>selectSearchResult(index)}>select</button></Td>
+                    <Td><button onClick={()=>selectSearchResult(index, "geo")}>select</button></Td>
                   )}
                 </tr>))}
           </SearchListTable>
