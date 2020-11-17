@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useLayoutEffect } from "react";
 import { useHistory } from "react-router-dom";
 
 import styled from "styled-components";
@@ -42,7 +42,7 @@ const Main = () => {
 
   const [allCases, setAllCases] = useState([]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const getAllCases = () => {
         axios
         .get(`${process.env.REACT_APP_BACKEND_HOST}/cases`)

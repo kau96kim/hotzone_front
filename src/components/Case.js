@@ -96,7 +96,7 @@ const Case = () => {
     }
     getCaseDetail();
     getLocations();
-  },[])
+  },[caseId])
 
   const handlelocationInput = (e) => {
     setLocationInput(e.target.value);
