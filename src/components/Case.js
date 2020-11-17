@@ -8,7 +8,7 @@ const CaseWrapper = styled.div`
   text-align: center;
 `;
 const Table = styled.table`
-  font-size: 15px;
+  font-size: 13px;
   border-collapse: collapse;
   margin-left: auto;
   margin-right: auto;
@@ -62,6 +62,7 @@ const Button = styled.button`
   background-color: thistle;
   border: 2px solid black;
   color: purple;
+  margin-bottom: 20px;
 `;
 
 const Case = () => {
@@ -74,6 +75,7 @@ const Case = () => {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [category, setCategory] = useState("");
+  const [selectedLocationIndex, setSelectedLocationIndex] = useState(-1);
 
   useEffect(() => {
     const getCaseDetail = () => {
@@ -108,7 +110,7 @@ const Case = () => {
         params: { q: locationInput },
       })
       .then((res) => {
-        setLocationOutput(res.data[0]);
+        setLocationOutput(res.data);
       })
       .catch((error) => {
         if (error.response.status === 400) {
@@ -129,19 +131,34 @@ const Case = () => {
     setCategory(e.target.value);
   };
 
+  const selectSearchResult = (index) => {
+    setSelectedLocationIndex(index);
+  };
+
   const handleAddLocation = (index) => {
+
+    if (selectedLocationIndex===-1) {
+      alert("Please select a location");
+      return;
+    }  
+
+    if (dateFrom==="" || dateTo==="" || category==="") {
+      alert("Please enter all the information!");
+      return;
+    }
+
     var dataToBeAdded = {
-    location: locationOutput.nameEN,
-    address: locationOutput.addressEN,
-    x_coord: locationOutput.x,
-    y_coord: locationOutput.y,
-    date_from: dateFrom,
-    date_to: dateTo,
-    category: category
-  }
+      location: locationOutput[selectedLocationIndex].nameEN,
+      address: locationOutput[selectedLocationIndex].addressEN,
+      x_coord: locationOutput[selectedLocationIndex].x,
+      y_coord: locationOutput[selectedLocationIndex].y,
+      date_from: dateFrom,
+      date_to: dateTo,
+      category: category
+    }
 
     console.log(dataToBeAdded);
-
+    
     axios
     .post(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}/locations`, dataToBeAdded)
     .then((res) => {
@@ -212,16 +229,23 @@ const Case = () => {
       {locationOutput ? (
         <div>
           <SearchListTable>
-            <Th>Location</Th>
-            <Th>Address</Th>
-            <Th>X Coord</Th>
-            <Th>Y Coord</Th>
-            <tr>
-              <Td>{locationOutput.nameEN}</Td>
-              <Td>{locationOutput.addressEN}</Td>
-              <Td>{locationOutput.x}</Td>
-              <Td>{locationOutput.y}</Td>
-            </tr>
+                <Th>Location</Th>
+                <Th>Address</Th>
+                <Th>X Coord</Th>
+                <Th>Y Coord</Th>
+                <Th></Th>
+                {locationOutput.map((output, index) => (
+                <tr key={index}>
+                  <Td>{output.nameEN}</Td>
+                  <Td>{output.addressEN}</Td>
+                  <Td>{output.x}</Td>
+                  <Td>{output.y}</Td>
+                  {selectedLocationIndex===index ? (
+                    <Td>✓selected</Td>
+                  ): (
+                    <Td><button onClick={()=>selectSearchResult(index)}>select</button></Td>
+                  )}
+                </tr>))}
           </SearchListTable>
           <Table>
             <Th>Date From</Th>
@@ -243,11 +267,15 @@ const Case = () => {
                 />
               </Td>
               <Td>
-                <Input
+                <select 
                   onChange={handleCategoryChange}
                   value={category}
-                  placeholder="Visit, Workplace, Residence"
-                />
+                >    
+                  <option value=""></option>        
+                  <option value="Visit">Visit</option>
+                  <option value="Workplace">Workplace</option>
+                  <option value="Residence">Residence</option>
+                </select>
               </Td>
             </tr>
           </Table>
