@@ -113,14 +113,11 @@ const Case = () => {
         params: { q: locationInput },
       })
       .then((res) => {
-        console.log(res.data);
         setDbOutput(res.data.location_db);
         setLocationOutput(res.data.location_geo);
       })
       .catch((error) => {
-        //if (error.response.status === 400) {
-          //alert("No search result");
-        //}
+
       });
   };
 
