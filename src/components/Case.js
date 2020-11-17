@@ -88,6 +88,7 @@ const Case = () => {
             setCaseDetail(res.data);
         })
         .catch((error) => {
+          //TODO. (Michael, please handle error 500)
         });
     }
     const getLocations = () => {
@@ -97,6 +98,7 @@ const Case = () => {
             setLocations(res.data);
         })
         .catch((error) => {
+          //TODO. (Michael, please handle error 500)
         });
     }
     getCaseDetail();
@@ -117,7 +119,7 @@ const Case = () => {
         setLocationOutput(res.data.location_geo);
       })
       .catch((error) => {
-
+        //TODO. (Michael, please handle error 404 and 500)
       });
   };
 
@@ -180,6 +182,7 @@ const Case = () => {
         window.location.reload(false);
     })
     .catch((error) => {
+      //TODO. (Michael, please handle error 400 and 500)
     });
   };
 
@@ -243,7 +246,7 @@ const Case = () => {
       {locationOutput ? (
         <div>
           <SearchListTable>
-                <Th>Location (Recently added)</Th>
+                <Th>Location (Frequently used)</Th>
                 <Th>Address</Th>
                 <Th>X Coord</Th>
                 <Th>Y Coord</Th>
@@ -254,7 +257,7 @@ const Case = () => {
                   <Td>{output.address}</Td>
                   <Td>{output.x_coord}</Td>
                   <Td>{output.y_coord}</Td>
-                  {selectedLocationIndex===index ? (
+                  {selectedLocationIndex===index && selectedType==="db" ? (
                     <Td>✓selected</Td>
                   ): (
                     <Td><button onClick={()=>selectSearchResult(index, "db")}>select</button></Td>
@@ -271,7 +274,7 @@ const Case = () => {
                   <Td>{output.address}</Td>
                   <Td>{output.x_coord}</Td>
                   <Td>{output.y_coord}</Td>
-                  {selectedLocationIndex===index ? (
+                  {selectedLocationIndex===index && selectedType==="geo" ? (
                     <Td>✓selected</Td>
                   ): (
                     <Td><button onClick={()=>selectSearchResult(index, "geo")}>select</button></Td>

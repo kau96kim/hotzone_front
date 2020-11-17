@@ -50,6 +50,7 @@ const Main = () => {
             setAllCases(res.data);
         })
         .catch((error) => {
+          //TODO. (Michael, please handle error 500)
         });
     }
 
