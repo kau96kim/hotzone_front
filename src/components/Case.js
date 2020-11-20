@@ -1,5 +1,5 @@
 import React, {useLayoutEffect, useState} from "react";
-import {Link, useParams, useHistory} from "react-router-dom";
+import {Link, useHistory, useParams} from "react-router-dom";
 
 import styled from "styled-components";
 import axios from "axios";
@@ -79,7 +79,7 @@ const Case = () => {
   const [category, setCategory] = useState("");
   const [selectedLocationIndex, setSelectedLocationIndex] = useState(-1);
   const [selectedType, setSelectedType] = useState("");
-
+  const [update, setUpdate] = useState(0);
   const history = useHistory();
 
   useLayoutEffect(() => {
@@ -118,7 +118,7 @@ const Case = () => {
         });
     }
     getCaseDetail();
-  }, [caseId, history])
+  }, [caseId, history, update])
 
   const handlelocationInput = (e) => {
     setLocationInput(e.target.value);
@@ -219,6 +219,10 @@ const Case = () => {
       })
       .then((res) => {
         alert("Added Successfully");
+        setUpdate(update + 1);
+        setDbOutput(null);
+        setLocationOutput(null);
+        setLocationInput("");
       })
       .catch((error) => {
         if (error.response.status === 400) {
@@ -310,7 +314,7 @@ const Case = () => {
             </tr>
             </thead>
             <tbody>
-            {dbOutput.map((output, index) => (
+            {dbOutput?.map((output, index) => (
               <tr key={index}>
                 <Td>{output.location}</Td>
                 <Td>{output.address}</Td>
@@ -335,7 +339,7 @@ const Case = () => {
             </tr>
             </thead>
             <tbody>
-            {locationOutput.map((output, index) => (
+            {locationOutput?.map((output, index) => (
               <tr key={index}>
                 <Td>{output.location}</Td>
                 <Td>{output.address}</Td>
