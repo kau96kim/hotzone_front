@@ -1,5 +1,5 @@
-import React, { useState, useLayoutEffect } from "react";
-import { useHistory } from "react-router-dom";
+import React, {useLayoutEffect, useState} from "react";
+import {useHistory} from "react-router-dom";
 
 import styled from "styled-components";
 import axios from "axios";
@@ -37,25 +37,47 @@ const Title = styled.div`
   margin: 50px;
 `;
 
+const ButtonWrapper = styled.div`
+  margin-left: 20px;
+  margin-top: 20px;
+  text-align: left;
+`;
+
+const Button = styled.button`
+  width: 120px;
+  height: 30px;
+  font-size: 15px;
+  font-weight: bold;
+  background-color: thistle;
+  border: 2px solid black;
+  color: purple;
+  margin-bottom: 20px;
+`;
+
 const Main = () => {
   const history = useHistory();
 
   const [allCases, setAllCases] = useState([]);
 
   useLayoutEffect(() => {
-    const getAllCases = () => {
-        axios
-        .get(`${process.env.REACT_APP_BACKEND_HOST}/cases`)
-        .then((res) => {
-            setAllCases(res.data);
-        })
-        .catch((error) => {
-          //TODO. (Michael, please handle error 500)
-        });
-    }
-
-    getAllCases();
-  },[])
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_HOST}/cases`, {
+        headers: {
+          "Authorization": "Token " + localStorage.getItem("Authorization")
+        }
+      })
+      .then((res) => {
+        setAllCases(res.data);
+      })
+      .catch((error) => {
+        if (error.response.status === 401) {
+          alert("your token expired :(\nplease login again!");
+          history.push("/login");
+        } else {
+          alert("There is something wrong with the server :(\nplease try again later!");
+        }
+      });
+  }, [history])
 
   const goToCase = (caseNo) => {
     history.push({
@@ -63,36 +85,53 @@ const Main = () => {
     });
   };
 
+  const logout = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_HOST}/staff/logout`, {
+        headers: {"Authorization": "Token " + localStorage.getItem("Authorization")}
+      })
+      .then((res) => {
+        localStorage.removeItem("Authorization");
+      })
+      .catch((error) => {
+        alert("There is something wrong with the server :(\nplease try again later!");
+        history.push("/login");
+      });
+  }
+
   return (
     <MainWrapper>
       <Title>Case data</Title>
+      <ButtonWrapper>
+        <Button onClick={logout}>Logout</Button>
+      </ButtonWrapper>
       <Table>
         <thead>
-          <tr>
-            <Th>Case Number</Th>
-            <Th>Date Confirmed</Th>
-            <Th>Local or Imported</Th>
-            <Th>Patient Name</Th>
-            <Th>Identity Document Number</Th>
-            <Th>Date of Birth</Th>
-            <Th>Virus Name</Th>
-            <Th>Disease</Th>
-            <Th>Max. Infectious Period (days)</Th>
-          </tr>
+        <tr>
+          <Th>Case Number</Th>
+          <Th>Date Confirmed</Th>
+          <Th>Local or Imported</Th>
+          <Th>Patient Name</Th>
+          <Th>Identity Document Number</Th>
+          <Th>Date of Birth</Th>
+          <Th>Virus Name</Th>
+          <Th>Disease</Th>
+          <Th>Max. Infectious Period (days)</Th>
+        </tr>
         </thead>
         <tbody>
         {allCases.map((item, index) => (
-        <Tr onClick={() => goToCase(item.case_number)} key={index}>
-          <Td>{item.case_number}</Td>
-          <Td>{item.date_confirmed}</Td>
-          <Td>{item.local_or_imported}</Td>
-          <Td>{item.patient_name}</Td>
-          <Td>{item.patient_id_number}</Td>
-          <Td>{item.patient_birth}</Td>
-          <Td>{item.virus_name}</Td>
-          <Td>{item.disease}</Td>
-          <Td>{item.max_infectious_period}</Td>
-        </Tr>))}
+          <Tr onClick={() => goToCase(item.case_number)} key={index}>
+            <Td>{item.case_number}</Td>
+            <Td>{item.date_confirmed}</Td>
+            <Td>{item.local_or_imported}</Td>
+            <Td>{item.patient_name}</Td>
+            <Td>{item.patient_id_number}</Td>
+            <Td>{item.patient_birth}</Td>
+            <Td>{item.virus_name}</Td>
+            <Td>{item.disease}</Td>
+            <Td>{item.max_infectious_period}</Td>
+          </Tr>))}
         </tbody>
       </Table>
     </MainWrapper>
