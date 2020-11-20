@@ -146,7 +146,7 @@ const Case = () => {
 
   const logout = () => {
     axios
-      .get(`${process.env.REACT_APP_BACKEND_HOST}/staff/logout`, {
+      .post(`${process.env.REACT_APP_BACKEND_HOST}/staff/logout`, {
         headers: {"Authorization": "Token " + localStorage.getItem("Authorization")}
       })
       .then((res) => {
