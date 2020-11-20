@@ -38,9 +38,9 @@ const Title = styled.div`
 `;
 
 const ButtonWrapper = styled.div`
-  margin-left: 20px;
+  margin-right: 20px;
   margin-top: 20px;
-  text-align: left;
+  text-align: right;
 `;
 
 const Button = styled.button`
@@ -86,25 +86,26 @@ const Main = () => {
   };
 
   const logout = () => {
+    console.log(localStorage.getItem("Authorization"));
     axios
-      .get(`${process.env.REACT_APP_BACKEND_HOST}/staff/logout`, {
+      .post(`${process.env.REACT_APP_BACKEND_HOST}/staff/logout`, null, {
         headers: {"Authorization": "Token " + localStorage.getItem("Authorization")}
       })
       .then((res) => {
         localStorage.removeItem("Authorization");
+        history.push("/login");
       })
       .catch((error) => {
         alert("There is something wrong with the server :(\nplease try again later!");
-        history.push("/login");
       });
   }
 
   return (
     <MainWrapper>
-      <Title>Case data</Title>
       <ButtonWrapper>
         <Button onClick={logout}>Logout</Button>
       </ButtonWrapper>
+      <Title>Case data</Title>
       <Table>
         <thead>
         <tr>
