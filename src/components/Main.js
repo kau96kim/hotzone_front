@@ -86,16 +86,17 @@ const Main = () => {
   };
 
   const logout = () => {
+    console.log(localStorage.getItem("Authorization"));
     axios
-      .post(`${process.env.REACT_APP_BACKEND_HOST}/staff/logout`, {
+      .post(`${process.env.REACT_APP_BACKEND_HOST}/staff/logout`, null, {
         headers: {"Authorization": "Token " + localStorage.getItem("Authorization")}
       })
       .then((res) => {
         localStorage.removeItem("Authorization");
+        history.push("/login");
       })
       .catch((error) => {
         alert("There is something wrong with the server :(\nplease try again later!");
-        history.push("/login");
       });
   }
 
