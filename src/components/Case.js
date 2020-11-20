@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, {useLayoutEffect, useState} from "react";
+import {Link, useParams, useHistory} from "react-router-dom";
 
 import styled from "styled-components";
 import axios from "axios";
@@ -51,9 +51,9 @@ const Input = styled.input`
   font-size: 15px;
 `;
 const ButtonWrapper = styled.div`
-  margin-left: 20px;
-  margin-top: 20px;
-  text-align: left;
+  margin: 20px 20px 0 20px;
+  display: flex;
+  justify-content: space-between;
 `;
 const Button = styled.button`
   width: 120px;
@@ -67,7 +67,7 @@ const Button = styled.button`
 `;
 
 const Case = () => {
-  let { caseId } = useParams();
+  let {caseId} = useParams();
 
   const [caseDetail, setCaseDetail] = useState({});
   const [locations, setLocations] = useState([]);
@@ -80,48 +80,83 @@ const Case = () => {
   const [selectedLocationIndex, setSelectedLocationIndex] = useState(-1);
   const [selectedType, setSelectedType] = useState("");
 
-  useEffect(() => {
+  const history = useHistory();
+
+  useLayoutEffect(() => {
     const getCaseDetail = () => {
-        axios
-        .get(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}`)
+      axios
+        .get(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}`, {
+          headers: {
+            "Authorization": "Token " + localStorage.getItem("Authorization")
+          }
+        })
         .then((res) => {
-            setCaseDetail(res.data);
+          setCaseDetail(res.data);
+          getLocations();
         })
         .catch((error) => {
-          //TODO. (Michael, please handle error 500)
+          if (error.response.status === 401) {
+            alert("your token expired :(\nplease login again!");
+            history.push("/login");
+          } else {
+            alert("There is something wrong with the server :(\nplease try again later!");
+          }
         });
     }
     const getLocations = () => {
-        axios
-        .get(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}/locations`)
+      axios
+        .get(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}/locations`, {
+          headers: {
+            "Authorization": "Token " + localStorage.getItem("Authorization")
+          }
+        })
         .then((res) => {
-            setLocations(res.data);
+          setLocations(res.data);
         })
         .catch((error) => {
-          //TODO. (Michael, please handle error 500)
+          alert("There is something wrong with the server :(\nplease try again later!");
         });
     }
     getCaseDetail();
-    getLocations();
-  },[caseId])
+  }, [caseId, history])
 
   const handlelocationInput = (e) => {
     setLocationInput(e.target.value);
   };
 
-  const handleSearchLocation = (e) => {
+  const handleSearchLocation = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_HOST}/locations/search`, {
-        params: { q: locationInput },
+        headers: {"Authorization": "Token " + localStorage.getItem("Authorization")},
+        params: {q: locationInput},
       })
       .then((res) => {
         setDbOutput(res.data.location_db);
         setLocationOutput(res.data.location_geo);
       })
       .catch((error) => {
-        //TODO. (Michael, please handle error 404 and 500)
+        if (error.response.status === 400) {
+          alert("There is no data found :(\ntry other keywords!");
+        } else if (error.response.status === 401) {
+          alert("your token expired :(\nplease login again!");
+          history.push("/login");
+        }
       });
   };
+
+  const logout = () => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_HOST}/staff/logout`, {
+        headers: {"Authorization": "Token " + localStorage.getItem("Authorization")}
+      })
+      .then((res) => {
+        localStorage.removeItem("Authorization");
+      })
+      .catch((error) => {
+        alert("There is something wrong with the server :(\nplease try again later!");
+        history.push("/login");
+      });
+  }
 
   const handleDateFromChange = (e) => {
     setDateFrom(e.target.value);
@@ -142,18 +177,18 @@ const Case = () => {
 
   const handleAddLocation = (index) => {
 
-    if (selectedLocationIndex===-1) {
+    if (selectedLocationIndex === -1) {
       alert("Please select a location");
       return;
-    }  
+    }
 
-    if (dateFrom==="" || dateTo==="" || category==="") {
+    if (dateFrom === "" || dateTo === "" || category === "") {
       alert("Please enter all the information!");
       return;
     }
 
     var dataToBeAdded;
-    if (selectedType==="db"){
+    if (selectedType === "db") {
       dataToBeAdded = {
         location: dbOutput[selectedLocationIndex].location,
         address: dbOutput[selectedLocationIndex].address,
@@ -174,16 +209,21 @@ const Case = () => {
         category: category
       }
     }
-    
+
     axios
-    .post(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}/locations`, dataToBeAdded)
-    .then((res) => {
+      .post(`${process.env.REACT_APP_BACKEND_HOST}/cases/${caseId}/locations`, dataToBeAdded, {
+        headers: {
+          "Authorization": "Token " + localStorage.getItem("Authorization")
+        }
+      })
+      .then((res) => {
         alert("Added Successfully");
-        window.location.reload(false);
-    })
-    .catch((error) => {
-      //TODO. (Michael, please handle error 400 and 500)
-    });
+      })
+      .catch((error) => {
+        if (error.response.status === 400) {
+          alert("please check your input again!");
+        }
+      });
   };
 
   return (
@@ -192,58 +232,59 @@ const Case = () => {
         <Link to="/">
           <Button>back</Button>
         </Link>
+        <Button onClick={logout}>Logout</Button>
       </ButtonWrapper>
       <Title>Case Number: {caseDetail.case_number}</Title>
       <Table>
         <thead>
-          <tr>
-            <Th>Date Confirmed</Th>
-            <Th>Local or Imported</Th>
-            <Th>Patient Name</Th>
-            <Th>ID Number</Th>
-            <Th>Date of Birth</Th>
-            <Th>Virus Name</Th>
-            <Th>Disease</Th>
-            <Th>Max Infectious Period</Th>
-          </tr>
+        <tr>
+          <Th>Date Confirmed</Th>
+          <Th>Local or Imported</Th>
+          <Th>Patient Name</Th>
+          <Th>ID Number</Th>
+          <Th>Date of Birth</Th>
+          <Th>Virus Name</Th>
+          <Th>Disease</Th>
+          <Th>Max Infectious Period</Th>
+        </tr>
         </thead>
         <tbody>
-          <tr>
-            <Td>{caseDetail.date_confirmed}</Td>
-            <Td>{caseDetail.local_or_imported}</Td>
-            <Td>{caseDetail.patient_name}</Td>
-            <Td>{caseDetail.patient_id_number}</Td>
-            <Td>{caseDetail.patient_birth}</Td>
-            <Td>{caseDetail.virus_name}</Td>
-            <Td>{caseDetail.disease}</Td>
-            <Td>{caseDetail.max_infectious_period}</Td>
-          </tr>
+        <tr>
+          <Td>{caseDetail.date_confirmed}</Td>
+          <Td>{caseDetail.local_or_imported}</Td>
+          <Td>{caseDetail.patient_name}</Td>
+          <Td>{caseDetail.patient_id_number}</Td>
+          <Td>{caseDetail.patient_birth}</Td>
+          <Td>{caseDetail.virus_name}</Td>
+          <Td>{caseDetail.disease}</Td>
+          <Td>{caseDetail.max_infectious_period}</Td>
+        </tr>
         </tbody>
       </Table>
 
       <Table>
         <thead>
-          <tr>
-            <Th>Location</Th>
-            <Th>Address</Th>
-            <Th>X Coord</Th>
-            <Th>Y Coord</Th>
-            <Th>Date From</Th>
-            <Th>Date To</Th>
-            <Th>Category</Th>
-          </tr>
+        <tr>
+          <Th>Location</Th>
+          <Th>Address</Th>
+          <Th>X Coord</Th>
+          <Th>Y Coord</Th>
+          <Th>Date From</Th>
+          <Th>Date To</Th>
+          <Th>Category</Th>
+        </tr>
         </thead>
         <tbody>
         {locations.map((location, index) => (
-        <tr key={index}>
-          <Td>{location.location}</Td>
-          <Td>{location.address}</Td>
-          <Td>{location.x_coord}</Td>
-          <Td>{location.y_coord}</Td>
-          <Td>{location.date_from}</Td>
-          <Td>{location.date_to}</Td>
-          <Td>{location.category}</Td>
-        </tr>))}
+          <tr key={index}>
+            <Td>{location.location}</Td>
+            <Td>{location.address}</Td>
+            <Td>{location.x_coord}</Td>
+            <Td>{location.y_coord}</Td>
+            <Td>{location.date_from}</Td>
+            <Td>{location.date_to}</Td>
+            <Td>{location.category}</Td>
+          </tr>))}
         </tbody>
       </Table>
 
@@ -259,88 +300,92 @@ const Case = () => {
         <div>
           <SearchListTable>
             <thead>
-              <tr>
-                <Th>Location (Frequently used)</Th>
-                <Th>Address</Th>
-                <Th>X Coord</Th>
-                <Th>Y Coord</Th>
-                <Th></Th>
-              </tr>
+            <tr>
+              <Th>Location (Frequently used)</Th>
+              <Th>Address</Th>
+              <Th>X Coord</Th>
+              <Th>Y Coord</Th>
+              <Th></Th>
+            </tr>
             </thead>
             <tbody>
-                {dbOutput.map((output, index) => (
-                <tr key={index}>
-                  <Td>{output.location}</Td>
-                  <Td>{output.address}</Td>
-                  <Td>{output.x_coord}</Td>
-                  <Td>{output.y_coord}</Td>
-                  {selectedLocationIndex===index && selectedType==="db" ? (
-                    <Td>✓selected</Td>
-                  ): (
-                    <Td><button onClick={()=>selectSearchResult(index, "db")}>select</button></Td>
-                  )}
-                </tr>))}
+            {dbOutput.map((output, index) => (
+              <tr key={index}>
+                <Td>{output.location}</Td>
+                <Td>{output.address}</Td>
+                <Td>{output.x_coord}</Td>
+                <Td>{output.y_coord}</Td>
+                {selectedLocationIndex === index && selectedType === "db" ? (
+                  <Td>✓selected</Td>
+                ) : (
+                  <Td>
+                    <button onClick={() => selectSearchResult(index, "db")}>select</button>
+                  </Td>
+                )}
+              </tr>))}
             </tbody>
             <thead>
-              <tr>
-                <Th>Location (New)</Th>
-                <Th>Address</Th>
-                <Th>X Coord</Th>
-                <Th>Y Coord</Th>
-                <Th></Th>
-              </tr>
+            <tr>
+              <Th>Location (New)</Th>
+              <Th>Address</Th>
+              <Th>X Coord</Th>
+              <Th>Y Coord</Th>
+              <Th></Th>
+            </tr>
             </thead>
             <tbody>
-                {locationOutput.map((output, index) => (
-                <tr key={index}>
-                  <Td>{output.location}</Td>
-                  <Td>{output.address}</Td>
-                  <Td>{output.x_coord}</Td>
-                  <Td>{output.y_coord}</Td>
-                  {selectedLocationIndex===index && selectedType==="geo" ? (
-                    <Td>✓selected</Td>
-                  ): (
-                    <Td><button onClick={()=>selectSearchResult(index, "geo")}>select</button></Td>
-                  )}
-                </tr>))}
+            {locationOutput.map((output, index) => (
+              <tr key={index}>
+                <Td>{output.location}</Td>
+                <Td>{output.address}</Td>
+                <Td>{output.x_coord}</Td>
+                <Td>{output.y_coord}</Td>
+                {selectedLocationIndex === index && selectedType === "geo" ? (
+                  <Td>✓selected</Td>
+                ) : (
+                  <Td>
+                    <button onClick={() => selectSearchResult(index, "geo")}>select</button>
+                  </Td>
+                )}
+              </tr>))}
             </tbody>
           </SearchListTable>
           <Table>
             <thead>
-              <tr>
-                <Th>Date From</Th>
-                <Th>Date To</Th>
-                <Th>Category</Th>
-              </tr>
+            <tr>
+              <Th>Date From</Th>
+              <Th>Date To</Th>
+              <Th>Category</Th>
+            </tr>
             </thead>
             <tbody>
-              <tr>
-                <Td>
-                  <Input
-                    onChange={handleDateFromChange}
-                    value={dateFrom}
-                    placeholder="****-**-**"
-                  />
-                </Td>
-                <Td>
-                  <Input
-                    onChange={handleDateToChange}
-                    value={dateTo}
-                    placeholder="****-**-**"
-                  />
-                </Td>
-                <Td>
-                  <select 
-                    onChange={handleCategoryChange}
-                    value={category}
-                  >    
-                    <option value=""></option>        
-                    <option value="Visit">Visit</option>
-                    <option value="Workplace">Workplace</option>
-                    <option value="Residence">Residence</option>
-                  </select>
-                </Td>
-              </tr>
+            <tr>
+              <Td>
+                <Input
+                  onChange={handleDateFromChange}
+                  value={dateFrom}
+                  placeholder="****-**-**"
+                />
+              </Td>
+              <Td>
+                <Input
+                  onChange={handleDateToChange}
+                  value={dateTo}
+                  placeholder="****-**-**"
+                />
+              </Td>
+              <Td>
+                <select
+                  onChange={handleCategoryChange}
+                  value={category}
+                >
+                  <option value=""></option>
+                  <option value="Visit">Visit</option>
+                  <option value="Workplace">Workplace</option>
+                  <option value="Residence">Residence</option>
+                </select>
+              </Td>
+            </tr>
             </tbody>
           </Table>
 

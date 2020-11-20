@@ -1,5 +1,7 @@
-import React, {useState} from "react";
+import React, {useLayoutEffect, useState} from "react";
 import styled from "styled-components";
+import axios from "axios";
+import {useHistory} from "react-router-dom";
 
 const MainWrapper = styled.div`
   display: flex;
@@ -58,10 +60,46 @@ const LoginButton = styled.button`
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const history = useHistory();
 
-  const login = () => {
-    console.log(username)
-    console.log(password)
+  const formData = new FormData();
+
+  useLayoutEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_HOST}/staff`, {
+        headers: {
+          "Authorization": "Token " + localStorage.getItem("Authorization")
+        }
+      })
+      .then(res => {
+        history.push("/");
+      })
+      .catch(error => {
+
+      });
+  },[history])
+
+  const login = (e) => {
+    e.preventDefault();
+    formData.append('username', username);
+    formData.append('password', password);
+    axios
+      .post(`${process.env.REACT_APP_BACKEND_HOST}/staff/login`, formData)
+      .then(res => {
+        localStorage.removeItem("Authorization");
+        localStorage.setItem("Authorization", res.data.token);
+        alert("Login Success!\nHello, " + res.data.user.username);
+        history.push("/")
+      })
+      .catch(err => {
+        if (err.response === null) {
+          alert("There is something wrong with the server.\nYou may contact the administrator!");
+        } else if (err.response.status === 400) {
+          alert("your username/password are incorrect!");
+        } else {
+          alert("There is something wrong with the server.\nPlease try again later!");
+        }
+      });
   }
 
   const handleUsernameChange = (e) => {
@@ -76,8 +114,10 @@ const Login = () => {
     <MainWrapper>
       <Logo>HotZone</Logo>
       <InputWrapper>
-        <InputBox value={username} placeholder="username" onChange={handleUsernameChange}/>
-        <InputBox value={password} placeholder="password" onChange={handlePasswordChange} type="password"/>
+        <form onSubmit={login}>
+          <InputBox value={username} placeholder="username" onChange={handleUsernameChange} type="text"/>
+          <InputBox value={password} placeholder="password" onChange={handlePasswordChange} type="password"/>
+        </form>
         <LoginButton onClick={login}>login</LoginButton>
       </InputWrapper>
     </MainWrapper>
