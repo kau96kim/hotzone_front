@@ -29,7 +29,7 @@ const Th = styled.th`
 const Td = styled.td`
   border: 2px solid black;
   padding: 10px;
-  max-width: 420px;
+  max-width: 400px;
 `;
 const Title = styled.div`
   font-size: 30px;
@@ -220,8 +220,8 @@ const Case = () => {
       .then((res) => {
         alert("Added Successfully");
         setUpdate(update + 1);
-        setDbOutput(null);
-        setLocationOutput(null);
+        setDbOutput([]);
+        setLocationOutput([]);
         setLocationInput("");
       })
       .catch((error) => {
