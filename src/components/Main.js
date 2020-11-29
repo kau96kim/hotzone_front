@@ -113,7 +113,7 @@ const Main = () => {
     <MainWrapper>
 
       <HeaderWrapper>
-        <Button onClick={goToCluster}>Cluster</Button>
+        <Button onClick={goToCluster}>View Cluster</Button>
         <Title>Case data</Title>
         <Button onClick={logout}>Logout</Button>
       </HeaderWrapper>

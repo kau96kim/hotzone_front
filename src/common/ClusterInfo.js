@@ -71,11 +71,11 @@ const ClusterInfo = (props) => {
         <tbody>
         {props?.locations?.map((item, index) => (
           <Tr key={index}>
-            <Td>{item.locationName}</Td>
-            <Td>{item.X}</Td>
-            <Td>{item.Y}</Td>
-            <Td>{item.visitedDate}</Td>
-            <Td>{item.caseId}</Td>
+            <Td>{item.location}</Td>
+            <Td>{item.x_coord}</Td>
+            <Td>{item.y_coord}</Td>
+            <Td>{item.date_from}</Td>
+            <Td>{item.case_number}</Td>
           </Tr>))}
         </tbody>
       </Table>

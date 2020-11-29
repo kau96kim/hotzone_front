@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useLayoutEffect} from "react";
 import styled from "styled-components";
 import axios from "axios";
 import {useHistory} from "react-router-dom";
@@ -36,56 +36,29 @@ const Title = styled.div`
   margin: 50px;
 `;
 
-
-
-const dummyData = [
-  {
-    locationName: "Swrie Hall",
-    X: 12345,
-    Y: 54321,
-    visitedDate: "2020-10-01",
-    caseId: 1
-  },
-  {
-    locationName: "Swrie Hall",
-    X: 12345,
-    Y: 54321,
-    visitedDate: "2020-10-01",
-    caseId: 2
-  },
-  {
-    locationName: "Swrie Hall",
-    X: 12345,
-    Y: 54321,
-    visitedDate: "2020-10-01",
-    caseId: 1
-  },
-  {
-    locationName: "Swrie Hall",
-    X: 12345,
-    Y: 54321,
-    visitedDate: "2020-10-01",
-    caseId: 2
-  },
-  {
-    locationName: "Swrie Hall",
-    X: 12345,
-    Y: 54321,
-    visitedDate: "2020-10-01",
-    caseId: 1
-  },
-  {
-    locationName: "Swrie Hall",
-    X: 12345,
-    Y: 54321,
-    visitedDate: "2020-10-01",
-    caseId: 2
-  },
-]
-
 const Cluster = () => {
   const [clusters, setClusters] = useState(null);
   const history = useHistory();
+
+  useLayoutEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_HOST}/cases/clusters`, {
+        headers: {
+          "Authorization": "Token " + localStorage.getItem("Authorization")
+        }
+      })
+      .then((res) => {
+        setClusters(res.data.clusters);
+      })
+      .catch((error) => {
+        if (error.response.status === 401) {
+          alert("your token expired :(\nplease login again!");
+          history.push("/login");
+        } else {
+          alert("There is something wrong with the server :(\nplease try again later!");
+        }
+      });
+  }, [history]);
 
   const goToMain = () => {
     history.push("/");
@@ -113,10 +86,9 @@ const Cluster = () => {
         <Title>Hotzone Clusters</Title>
         <Button onClick={logout}>Logout</Button>
       </HeaderWrapper>
-      <ClusterInfo clusterId={1} clusterSize={6} locations={dummyData}/>
-      <ClusterInfo clusterId={2} clusterSize={6} locations={dummyData}/>
-      <ClusterInfo clusterId={3} clusterSize={6} locations={dummyData}/>
-
+      {clusters?.map((item, index) => (
+        <ClusterInfo key={index} clusterId={item.cluster} clusterSize={item.size} locations={item.cluster_list}/>
+      ))}
     </MainWrapper>
   )
 };
