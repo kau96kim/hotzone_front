@@ -131,8 +131,8 @@ const Case = () => {
         params: {q: locationInput},
       })
       .then((res) => {
-        setDbOutput(res.data.location_db);
-        setLocationOutput(res.data.location_geo);
+        setDbOutput(Array.from(res.data.location_db));
+        setLocationOutput(Array.from(res.data.location_geo));
       })
       .catch((error) => {
         if (error.response.status === 400) {
@@ -285,7 +285,7 @@ const Case = () => {
         </tr>
         </thead>
         <tbody>
-        {locations.map((location, index) => (
+        {locations?.map((location, index) => (
           <tr key={index}>
             <Td>{location.location}</Td>
             <Td>{location.address}</Td>
@@ -321,7 +321,7 @@ const Case = () => {
               </thead>
             ):(null)}
               <tbody>
-                  {dbOutput.map((output, index) => (
+                  {dbOutput?.map((output, index) => (
                   <tr key={index}>
                     <Td>{output.location}</Td>
                     <Td>{output.address}</Td>

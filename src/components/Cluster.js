@@ -48,7 +48,7 @@ const Cluster = () => {
         }
       })
       .then((res) => {
-        setClusters(res.data.clusters);
+        setClusters(Array.from(res.data.clusters));
       })
       .catch((error) => {
         if (error.response.status === 401) {

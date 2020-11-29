@@ -72,7 +72,7 @@ const Main = () => {
         }
       })
       .then((res) => {
-        setAllCases(res.data);
+        setAllCases(Array.from(res.data));
       })
       .catch((error) => {
         if (error.response.status === 401) {
@@ -133,7 +133,7 @@ const Main = () => {
         </tr>
         </thead>
         <tbody>
-        {allCases.map((item, index) => (
+        {allCases?.map((item, index) => (
           <Tr onClick={() => goToCase(item.case_number)} key={index}>
             <Td>{item.case_number}</Td>
             <Td>{item.date_confirmed}</Td>
