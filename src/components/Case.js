@@ -29,7 +29,7 @@ const Th = styled.th`
 const Td = styled.td`
   border: 2px solid black;
   padding: 10px;
-  max-width: 420px;
+  max-width: 400px;
 `;
 const Title = styled.div`
   font-size: 30px;
@@ -72,8 +72,8 @@ const Case = () => {
   const [caseDetail, setCaseDetail] = useState({});
   const [locations, setLocations] = useState([]);
   const [locationInput, setLocationInput] = useState("");
-  const [locationOutput, setLocationOutput] = useState(null);
-  const [dbOutput, setDbOutput] = useState(null);
+  const [locationOutput, setLocationOutput] = useState([]);
+  const [dbOutput, setDbOutput] = useState([]);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [category, setCategory] = useState("");
@@ -220,8 +220,8 @@ const Case = () => {
       .then((res) => {
         alert("Added Successfully");
         setUpdate(update + 1);
-        setDbOutput(null);
-        setLocationOutput(null);
+        setDbOutput([]);
+        setLocationOutput([]);
         setLocationInput("");
       })
       .catch((error) => {
@@ -301,34 +301,35 @@ const Case = () => {
         />
         <Button onClick={handleSearchLocation}>Search</Button>
       </LocationSearchWrapper>
-      {locationOutput ? (
+      {locationOutput.length>0 ? (
         <div>
           <SearchListTable>
-            <thead>
-            <tr>
-              <Th>Location (Frequently used)</Th>
-              <Th>Address</Th>
-              <Th>X Coord</Th>
-              <Th>Y Coord</Th>
-              <Th></Th>
-            </tr>
-            </thead>
-            <tbody>
-            {dbOutput?.map((output, index) => (
-              <tr key={index}>
-                <Td>{output.location}</Td>
-                <Td>{output.address}</Td>
-                <Td>{output.x_coord}</Td>
-                <Td>{output.y_coord}</Td>
-                {selectedLocationIndex === index && selectedType === "db" ? (
-                  <Td>✓selected</Td>
-                ) : (
-                  <Td>
-                    <button onClick={() => selectSearchResult(index, "db")}>select</button>
-                  </Td>
-                )}
-              </tr>))}
-            </tbody>
+            {dbOutput.length>0 ? (
+              <thead>
+                <tr>
+                  <Th>Location (Frequently used)</Th>
+                  <Th>Address</Th>
+                  <Th>X Coord</Th>
+                  <Th>Y Coord</Th>
+                  <Th></Th>
+                </tr>
+              </thead>
+            ):(null)}
+              <tbody>
+                  {dbOutput.map((output, index) => (
+                  <tr key={index}>
+                    <Td>{output.location}</Td>
+                    <Td>{output.address}</Td>
+                    <Td>{output.x_coord}</Td>
+                    <Td>{output.y_coord}</Td>
+                    {selectedLocationIndex===index && selectedType==="db" ? (
+                      <Td>✓selected</Td>
+                    ): (
+                      <Td><button onClick={()=>selectSearchResult(index, "db")}>select</button></Td>
+                    )}
+                  </tr>))}
+              </tbody>
+            {locationOutput.length>0 ? (
             <thead>
             <tr>
               <Th>Location (New)</Th>
@@ -338,6 +339,7 @@ const Case = () => {
               <Th></Th>
             </tr>
             </thead>
+            ):(null)}
             <tbody>
             {locationOutput?.map((output, index) => (
               <tr key={index}>
