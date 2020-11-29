@@ -5,6 +5,9 @@ import styled from "styled-components";
 import axios from "axios";
 
 const MainWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 `;
 const Table = styled.table`
@@ -37,10 +40,12 @@ const Title = styled.div`
   margin: 50px;
 `;
 
-const ButtonWrapper = styled.div`
-  margin-right: 20px;
-  margin-top: 20px;
-  text-align: right;
+const HeaderWrapper = styled.div`
+  max-width: 1080px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const Button = styled.button`
@@ -100,12 +105,19 @@ const Main = () => {
       });
   }
 
+  const goToCluster = () => {
+    history.push("/cluster");
+  };
+
   return (
     <MainWrapper>
-      <ButtonWrapper>
+
+      <HeaderWrapper>
+        <Button onClick={goToCluster}>Cluster</Button>
+        <Title>Case data</Title>
         <Button onClick={logout}>Logout</Button>
-      </ButtonWrapper>
-      <Title>Case data</Title>
+      </HeaderWrapper>
+
       <Table>
         <thead>
         <tr>
