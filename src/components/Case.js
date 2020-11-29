@@ -223,6 +223,11 @@ const Case = () => {
         setDbOutput([]);
         setLocationOutput([]);
         setLocationInput("");
+        setSelectedLocationIndex(-1);
+        setSelectedType("");
+        setDateTo("");
+        setDateFrom("");
+        setCategory("");
       })
       .catch((error) => {
         if (error.response.status === 400) {
